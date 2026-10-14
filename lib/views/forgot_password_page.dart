@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../l10n/app_language.dart';
+import '../providers/language_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_brand_header.dart';
 
@@ -30,67 +33,69 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    final s = lang.strings;
+
     return Scaffold(
       backgroundColor: AppTheme.slate50,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Logo & Page Name Header
               AppBrandHeader(
-                pageTitle: 'මුරපදය නැවත සකසන්න (Reset Password)',
-                subtitle: 'ගිණුමේ මුරපදය අමතක නම් ඔබගේ සාමාජික හෝ දුරකථන අංකය ඇතුළත් කරන්න',
+                pageTitle: s.forgotPasswordPageTitle,
+                subtitle: s.forgotPasswordInstructions,
                 showBack: true,
                 onBack: () => Navigator.pop(context),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
 
               if (!_submitted) ...[
-                // Reset Form Card
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(18),
                     border: Border.all(color: AppTheme.slate200),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 14,
-                        offset: const Offset(0, 4),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(18),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const Text(
-                          'සාමාජික අංකය හෝ ජංගම දුරකථනය',
-                          style: TextStyle(
+                        Text(
+                          s.memberIdOrPhone,
+                          style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                             color: AppTheme.slate900,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 6),
                         TextFormField(
                           controller: _inputCtrl,
-                          decoration: const InputDecoration(
-                            hintText: 'උදා: PLC-MEM-1042 හෝ 0705001122',
-                            prefixIcon: Icon(Icons.badge_outlined, size: 20),
+                          decoration: InputDecoration(
+                            hintText: 'PLC-MEM-1001 / 0705001122',
+                            prefixIcon: const Icon(Icons.badge_outlined, size: 20),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                           ),
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
-                              return 'කරුණාකර සාමාජික අංකය හෝ දුරකථන අංකය ඇතුළත් කරන්න';
+                              return s.memberIdOrPhone;
                             }
                             return null;
                           },
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 12),
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
@@ -98,31 +103,36 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: AppTheme.primaryBlue.withValues(alpha: 0.2)),
                           ),
-                          child: const Row(
+                          child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.info_outline_rounded, size: 18, color: AppTheme.primaryBlue),
-                              SizedBox(width: 8),
+                              const Icon(Icons.info_outline_rounded, size: 18, color: AppTheme.primaryBlue),
+                              const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  'ඔබගේ ලියාපදිංචි දුරකථන අංකයට මුරපදය නැවත සැකසීමේ OTP කේතයක් SMS මඟින් ලැබෙනු ඇත.',
-                                  style: TextStyle(fontSize: 11, color: AppTheme.slate700, height: 1.4),
+                                  lang.currentLanguage == AppLanguage.si
+                                      ? 'ඔබගේ ලියාපදිංචි දුරකථන අංකයට මුරපදය නැවත සැකසීමේ OTP කේතයක් SMS මඟින් ලැබෙනු ඇත.'
+                                      : lang.currentLanguage == AppLanguage.ta
+                                          ? 'உங்கள் பதிவுசெய்த தொலைபேசி எண்ணிற்கு SMS மூலம் OTP அனுப்பப்படும்.'
+                                          : 'A password reset OTP code will be sent to your registered mobile phone via SMS.',
+                                  style: const TextStyle(fontSize: 11, color: AppTheme.slate700, height: 1.4),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 18),
                         ElevatedButton.icon(
                           onPressed: _submit,
                           icon: const Icon(Icons.send_rounded, size: 18),
-                          label: const Text(
-                            'OTP කේතය ලබා ගන්න (Send OTP)',
-                            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                          label: Text(
+                            s.sendOtpBtn,
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.primaryBlue,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 13),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                         ),
@@ -135,69 +145,62 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(18),
                     border: Border.all(color: AppTheme.emeraldGreen.withValues(alpha: 0.3)),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 14,
-                        offset: const Offset(0, 4),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(22),
                   child: Column(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(14),
+                        padding: const EdgeInsets.all(12),
                         decoration: const BoxDecoration(
                           color: AppTheme.emerald50,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.check_circle_rounded, color: AppTheme.emeraldGreen, size: 42),
+                        child: const Icon(Icons.check_circle_rounded, color: AppTheme.emeraldGreen, size: 40),
                       ),
-                      const SizedBox(height: 14),
-                      const Text(
-                        'OTP කේතය යවන ලදී!',
-                        style: TextStyle(
-                          fontSize: 18,
+                      const SizedBox(height: 12),
+                      Text(
+                        lang.currentLanguage == AppLanguage.si
+                            ? 'OTP කේතය යවන ලදී!'
+                            : lang.currentLanguage == AppLanguage.ta
+                                ? 'OTP அனுப்பப்பட்டது!'
+                                : 'OTP Sent Successfully!',
+                        style: const TextStyle(
+                          fontSize: 17,
                           fontWeight: FontWeight.w800,
                           color: AppTheme.slate900,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       Text(
-                        '${_inputCtrl.text.trim()} වෙත මුරපදය නැවත සකසන සත්‍යාපන කේතය (OTP) යවන ලදී. කරුණාකර ඔබගේ SMS පණිවිඩ පරීක්ෂා කරන්න.',
+                        '${_inputCtrl.text.trim()} ${lang.currentLanguage == AppLanguage.si ? 'වෙත මුරපදය නැවත සකසන OTP කේතය යවන ලදී. කරුණාකර SMS පරීක්ෂා කරන්න.' : lang.currentLanguage == AppLanguage.ta ? 'எண்ணிற்கு கடவுச்சொல் மீட்டமைப்பு OTP அனுப்பப்பட்டுள்ளது.' : 'has been sent a password reset OTP. Please check your SMS messages.'}',
                         textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 12, color: AppTheme.slate600, height: 1.4),
+                        style: const TextStyle(fontSize: 11, color: AppTheme.slate600, height: 1.4),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 18),
                       ElevatedButton(
                         onPressed: () => Navigator.pop(context),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.primaryBlue,
+                          foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        child: const Text('නැවත පිවිසුම් පිටුවට (Back to Login)', style: TextStyle(fontWeight: FontWeight.w700)),
+                        child: Text(s.proceedToLogin, style: const TextStyle(fontWeight: FontWeight.w800)),
                       ),
                     ],
                   ),
                 ),
               ],
               const SizedBox(height: 20),
-
-              // Helpline Contact
-              Center(
-                child: TextButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.headset_mic_rounded, size: 16, color: AppTheme.slate600),
-                  label: const Text(
-                    'කාර්යාල සහාය: 0705001122 (Prime Life Care Support)',
-                    style: TextStyle(fontSize: 12, color: AppTheme.slate600, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
