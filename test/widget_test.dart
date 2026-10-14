@@ -1,70 +1,78 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:prime_life_care_staff/main.dart';
-import 'package:prime_life_care_staff/views/home_duty_view.dart';
-import 'package:prime_life_care_staff/views/login_view.dart';
+import 'package:prime_life_care_staff/views/login_page.dart';
+import 'package:prime_life_care_staff/views/register_page.dart';
+import 'package:prime_life_care_staff/views/forgot_password_page.dart';
+import 'package:prime_life_care_staff/views/splash_screen.dart';
 
 void main() {
-  testWidgets('Staff App launches to LoginView and allows demo sign-in', (WidgetTester tester) async {
-    // Configure standard mobile portrait viewport (390 x 844)
+  testWidgets('App starts at SplashScreen and transitions to LoginPage', (WidgetTester tester) async {
     tester.view.physicalSize = const Size(390 * 2.0, 844 * 2.0);
     tester.view.devicePixelRatio = 2.0;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(const PrimeLifeCareStaffApp());
-    await tester.pumpAndSettle();
-
-    // Check login view elements
-    expect(find.byType(LoginView), findsOneWidget);
+    await tester.pumpWidget(const PrimeLifeCareApp());
+    expect(find.byType(SplashScreen), findsOneWidget);
     expect(find.text('Prime Life Care'), findsOneWidget);
-    expect(find.text('Staff Sign In'), findsOneWidget);
 
-    // Tap on the first demo profile (Sister Chamila Perera)
-    final demoProfile = find.text('Sister Chamila Perera');
-    expect(demoProfile, findsOneWidget);
-
-    await tester.tap(demoProfile);
+    // Tap Continue button on splash
+    await tester.tap(find.text('පිවිසෙන්න (Continue to Login)'));
     await tester.pumpAndSettle();
 
-    // Verify navigation into HomeDutyView
-    expect(find.byType(HomeDutyView), findsOneWidget);
-    expect(find.text('EMERGENCY SOS DISPATCH'), findsOneWidget);
-    expect(find.text('2-Hour Bedsore Prevention'), findsOneWidget);
-    expect(find.text('Bedside Vitals Monitor'), findsOneWidget);
+    // Verify on LoginPage
+    expect(find.byType(LoginPage), findsOneWidget);
+
+    // Verify Logo and Page Name
+    expect(find.text('සාමාජික පිවිසුම (Member Login)'), findsOneWidget);
+    expect(find.text('PRIME LIFE CARE'), findsOneWidget);
+
+    // Verify Required Form Elements
+    expect(find.text('සාමාජික අංකය (Membership Number)'), findsOneWidget);
+    expect(find.text('මුරපදය (Password)'), findsOneWidget);
+    expect(find.text('ඇතුල් වන්න (Login)'), findsOneWidget);
+    expect(find.text('මුරපදය අමතකද? (Forgot Password?)'), findsOneWidget);
+    expect(find.text('අලුතින් ලියාපදිංචි වන්න (Register Now)'), findsOneWidget);
   });
 
-  testWidgets('Staff App renders cleanly on 412x915 viewport without overflows', (WidgetTester tester) async {
+  testWidgets('LoginPage navigation to ForgotPassword and RegisterPage works cleanly', (WidgetTester tester) async {
     tester.view.physicalSize = const Size(412 * 2.0, 915 * 2.0);
     tester.view.devicePixelRatio = 2.0;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(const PrimeLifeCareStaffApp());
+    await tester.pumpWidget(const PrimeLifeCareApp());
+    await tester.tap(find.text('පිවිසෙන්න (Continue to Login)'));
     await tester.pumpAndSettle();
 
-    // Sign in
-    await tester.tap(find.text('Sister Chamila Perera'));
+    // 1. Navigate to ForgotPasswordPage
+    final forgotBtn = find.text('මුරපදය අමතකද? (Forgot Password?)');
+    await tester.ensureVisible(forgotBtn);
+    await tester.pumpAndSettle();
+    await tester.tap(forgotBtn);
     await tester.pumpAndSettle();
 
-    // Switch tabs to Vitals
-    await tester.tap(find.text('Vitals'));
-    await tester.pumpAndSettle();
-    expect(find.text('Bedside Vitals & Health'), findsOneWidget);
+    expect(find.byType(ForgotPasswordPage), findsOneWidget);
+    expect(find.text('මුරපදය නැවත සකසන්න (Reset Password)'), findsOneWidget);
+    expect(find.text('PRIME LIFE CARE'), findsOneWidget);
 
-    // Switch tabs to Routine
-    await tester.tap(find.text('Routine'));
+    // Go back
+    await tester.tap(find.byTooltip('ආපසු (Back)'));
     await tester.pumpAndSettle();
-    expect(find.text('Routine & Bedside Care'), findsOneWidget);
+    expect(find.byType(LoginPage), findsOneWidget);
 
-    // Switch tabs to Shifts
-    await tester.tap(find.text('Shifts'));
+    // 2. Navigate to RegisterPage
+    final registerBtn = find.text('අලුතින් ලියාපදිංචි වන්න (Register Now)');
+    await tester.ensureVisible(registerBtn);
     await tester.pumpAndSettle();
-    expect(find.text('My Duty Roster'), findsOneWidget);
+    await tester.tap(registerBtn);
+    await tester.pumpAndSettle();
 
-    // Switch tabs to Profile
-    await tester.tap(find.text('Profile'));
-    await tester.pumpAndSettle();
-    expect(find.text('Staff Profile & Credentials'), findsOneWidget);
+    expect(find.byType(RegisterPage), findsOneWidget);
+    expect(find.text('නව සාමාජික ලියාපදිංචිය (Member Registration)'), findsOneWidget);
+    expect(find.text('PRIME LIFE CARE'), findsOneWidget);
+    expect(find.text('සම්පූර්ණ නම (Full Name)'), findsOneWidget);
+    expect(find.text('ලියාපදිංචි වන්න (Complete Registration)'), findsOneWidget);
   });
 }
