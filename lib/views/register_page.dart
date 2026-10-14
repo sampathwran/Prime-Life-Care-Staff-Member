@@ -4,7 +4,6 @@ import '../l10n/app_language.dart';
 import '../providers/language_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_brand_header.dart';
-import 'privacy_policy_sheet.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -24,8 +23,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final _passwordCtrl = TextEditingController();
   final _confirmPasswordCtrl = TextEditingController();
 
-  String _membershipType = 'beneficiary';
-  bool _agreedToPrivacyPolicy = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
@@ -46,22 +43,6 @@ class _RegisterPageState extends State<RegisterPage> {
     final s = lang.strings;
 
     if (!(_formKey.currentState?.validate() ?? false)) {
-      return;
-    }
-
-    if (!_agreedToPrivacyPolicy) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            lang.currentLanguage == AppLanguage.si
-                ? 'කරුණාකර රහස්‍යතා ප්‍රතිපත්තියට එකඟ වන්න'
-                : lang.currentLanguage == AppLanguage.ta
-                    ? 'தயவுசெய்து தனியுரிமைக் கொள்கையை ஏற்றுக்கொள்ளுங்கள்'
-                    : 'Please agree to the Privacy Policy & Rules',
-          ),
-          backgroundColor: AppTheme.rose500,
-        ),
-      );
       return;
     }
 
@@ -289,39 +270,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 12),
 
-                      // Membership Category Dropdown
-                      Text(
-                        s.membershipTypeLabel,
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppTheme.slate900),
-                      ),
-                      const SizedBox(height: 5),
-                      DropdownButtonFormField<String>(
-                        isExpanded: true,
-                        initialValue: _membershipType,
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.card_membership_rounded, size: 20),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                        ),
-                        items: [
-                          DropdownMenuItem(
-                            value: 'beneficiary',
-                            child: Text(s.catBeneficiary, style: const TextStyle(fontSize: 12)),
-                          ),
-                          DropdownMenuItem(
-                            value: 'general',
-                            child: Text(s.catGeneral, style: const TextStyle(fontSize: 12)),
-                          ),
-                          DropdownMenuItem(
-                            value: 'caregiver',
-                            child: Text(s.catCaregiver, style: const TextStyle(fontSize: 12)),
-                          ),
-                        ],
-                        onChanged: (val) {
-                          if (val != null) setState(() => _membershipType = val);
-                        },
-                      ),
-                      const SizedBox(height: 12),
-
                       // Password
                       Text(
                         s.passwordLabel,
@@ -373,65 +321,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 14),
-
-                      // Privacy Policy Agreement
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppTheme.slate50,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: _agreedToPrivacyPolicy ? AppTheme.primaryBlue.withValues(alpha: 0.3) : AppTheme.slate200,
-                          ),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: 32,
-                              height: 32,
-                              child: Checkbox(
-                                value: _agreedToPrivacyPolicy,
-                                activeColor: AppTheme.primaryBlue,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                                onChanged: (val) {
-                                  setState(() => _agreedToPrivacyPolicy = val ?? false);
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Wrap(
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                children: [
-                                  Text(
-                                    s.privacyPolicyAgreementPrefix,
-                                    style: const TextStyle(fontSize: 11, color: AppTheme.slate700),
-                                  ),
-                                  InkWell(
-                                    onTap: () => PrivacyPolicySheet.show(context),
-                                    child: Text(
-                                      s.privacyPolicyTitle,
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w800,
-                                        color: AppTheme.primaryBlue,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                    ),
-                                  ),
-                                  Text(
-                                    s.privacyPolicyAgreementSuffix,
-                                    style: const TextStyle(fontSize: 11, color: AppTheme.slate700),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 18),
 
                       // Submit Registration Button
                       ElevatedButton(

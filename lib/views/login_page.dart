@@ -317,56 +317,51 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 14),
 
-              // 3. Compact Register Section
+              // 3. Single-Row Register Section (Reduced Height)
               Container(
                 decoration: BoxDecoration(
                   color: AppTheme.blue50,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: AppTheme.primaryBlue.withValues(alpha: 0.15)),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                child: Column(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                child: Row(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.person_add_alt_1_rounded, color: AppTheme.primaryBlue, size: 18),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            s.noAccountPrompt,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: AppTheme.slate800,
-                            ),
-                          ),
+                    const Icon(Icons.person_add_alt_1_rounded, color: AppTheme.primaryBlue, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        s.noAccountPrompt,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.slate800,
                         ),
-                      ],
+                      ),
                     ),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: _navigateToRegister,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppTheme.primaryBlue,
-                          side: const BorderSide(color: AppTheme.primaryBlue, width: 1.2),
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        child: Text(
-                          s.registerNowBtn,
-                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
-                        ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: _navigateToRegister,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryBlue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        s.registerNowBtn,
+                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 14),
 
               // 4. Language Switcher Bar at the Bottom (සිංහල 🇱🇰 | English 🇬🇧 | தமிழ் 🇮🇳)
               Container(
