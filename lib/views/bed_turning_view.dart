@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/bed_turn_model.dart';
+import '../providers/language_provider.dart';
 import '../providers/staff_duty_provider.dart';
 import '../theme/app_theme.dart';
 
@@ -36,7 +37,7 @@ class _BedTurningViewState extends State<BedTurningView> {
       barrierCreamApplied: _barrierCreamApplied,
       heelsElevated: _heelsElevated,
       notes: _notesCtrl.text.trim().isEmpty
-          ? 'Patient repositioned safely to ${_selectedPosture.label.split('(').first.trim()}.'
+          ? 'Patient repositioned safely to ${_selectedPosture.label}.'
           : _notesCtrl.text.trim(),
     );
 
@@ -56,6 +57,8 @@ class _BedTurningViewState extends State<BedTurningView> {
 
   @override
   Widget build(BuildContext context) {
+    final langProvider = context.watch<LanguageProvider>();
+    final strings = langProvider.strings;
     final provider = context.watch<StaffDutyProvider>();
     final isOverdue = provider.isBedTurnOverdue;
     final timeRemaining = provider.timeUntilNextTurn;
@@ -64,7 +67,7 @@ class _BedTurningViewState extends State<BedTurningView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('2-Hour Bed Repositioning'),
+        title: Text(strings.bedTurningLogTitle),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -94,7 +97,7 @@ class _BedTurningViewState extends State<BedTurningView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          isOverdue ? 'BED REPOSITIONING OVERDUE' : 'NEXT TURN IN ${timeRemaining.inMinutes} MINS',
+                          isOverdue ? strings.bedTurnRepositioningOverdue : strings.bedTurnNextIn(timeRemaining.inMinutes),
                           style: TextStyle(
                             fontWeight: FontWeight.w900,
                             fontSize: 13,
@@ -167,7 +170,7 @@ class _BedTurningViewState extends State<BedTurningView> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      posture.label,
+                                      posture.localizedLabel(langProvider.currentLocale),
                                       style: TextStyle(
                                         fontWeight: FontWeight.w700,
                                         fontSize: 13,
@@ -208,7 +211,7 @@ class _BedTurningViewState extends State<BedTurningView> {
                       return DropdownMenuItem(
                         value: s,
                         child: Text(
-                          s.label,
+                          s.localizedLabel(langProvider.currentLocale),
                           style: TextStyle(
                             fontSize: 13,
                             color: s.requiresAlert ? AppTheme.rose800 : AppTheme.slate900,
@@ -334,7 +337,7 @@ class _BedTurningViewState extends State<BedTurningView> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  turn.posture.label.split('(').first.trim(),
+                                  turn.posture.localizedLabel(langProvider.currentLocale),
                                   style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w800,

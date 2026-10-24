@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/language_provider.dart';
 import '../theme/app_theme.dart';
 import 'home_duty_view.dart';
 import 'vitals_logger_view.dart';
@@ -22,10 +24,23 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
     });
   }
 
+  void _onOpenProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const ProfileEarningsView()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final langProvider = context.watch<LanguageProvider>();
+    final strings = langProvider.strings;
+
     final List<Widget> pages = [
-      HomeDutyView(onNavigateTab: _onSelectTab),
+      HomeDutyView(
+        onNavigateTab: _onSelectTab,
+        onOpenProfile: _onOpenProfile,
+      ),
       const VitalsLoggerView(),
       const DailyRoutineView(),
       const MyShiftsView(),
@@ -52,7 +67,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
           ],
         ),
         child: NavigationBar(
-          selectedIndex: _currentIndex,
+          selectedIndex: _currentIndex.clamp(0, 3),
           onDestinationSelected: (idx) {
             setState(() {
               _currentIndex = idx;
@@ -61,31 +76,26 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
           backgroundColor: Colors.white,
           indicatorColor: AppTheme.blueLight,
           elevation: 0,
-          destinations: const [
+          destinations: [
             NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home_rounded, color: AppTheme.primaryBlue),
-              label: 'Duty Hub',
+              icon: const Icon(Icons.home_outlined),
+              selectedIcon: const Icon(Icons.home_rounded, color: AppTheme.primaryBlue),
+              label: strings.navDutyHub,
             ),
             NavigationDestination(
-              icon: Icon(Icons.monitor_heart_outlined),
-              selectedIcon: Icon(Icons.monitor_heart_rounded, color: AppTheme.primaryBlue),
-              label: 'Vitals',
+              icon: const Icon(Icons.monitor_heart_outlined),
+              selectedIcon: const Icon(Icons.monitor_heart_rounded, color: AppTheme.primaryBlue),
+              label: strings.navVitals,
             ),
             NavigationDestination(
-              icon: Icon(Icons.checklist_rounded),
-              selectedIcon: Icon(Icons.checklist_rounded, color: AppTheme.primaryBlue),
-              label: 'Routine',
+              icon: const Icon(Icons.checklist_rounded),
+              selectedIcon: const Icon(Icons.checklist_rounded, color: AppTheme.primaryBlue),
+              label: strings.navRoutine,
             ),
             NavigationDestination(
-              icon: Icon(Icons.calendar_month_outlined),
-              selectedIcon: Icon(Icons.calendar_month_rounded, color: AppTheme.primaryBlue),
-              label: 'Shifts',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.badge_outlined),
-              selectedIcon: Icon(Icons.badge_rounded, color: AppTheme.primaryBlue),
-              label: 'Profile',
+              icon: const Icon(Icons.calendar_month_outlined),
+              selectedIcon: const Icon(Icons.calendar_month_rounded, color: AppTheme.primaryBlue),
+              label: strings.navShifts,
             ),
           ],
         ),

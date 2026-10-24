@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/language_provider.dart';
 import '../providers/staff_duty_provider.dart';
 import '../theme/app_theme.dart';
 
@@ -13,6 +14,8 @@ class BedTurnCountdownCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final langProvider = context.watch<LanguageProvider>();
+    final strings = langProvider.strings;
     final provider = context.watch<StaffDutyProvider>();
     final isOverdue = provider.isBedTurnOverdue;
     final timeRemaining = provider.timeUntilNextTurn;
@@ -66,9 +69,9 @@ class BedTurnCountdownCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            '2-Hour Bedsore Prevention',
-                            style: TextStyle(
+                          Text(
+                            strings.bedsorePreventionTitle,
+                            style: const TextStyle(
                               color: AppTheme.slate900,
                               fontWeight: FontWeight.w800,
                               fontSize: 13,
@@ -78,8 +81,8 @@ class BedTurnCountdownCard extends StatelessWidget {
                           ),
                           Text(
                             isOverdue
-                                ? 'OVERDUE: Reposition Patient Now!'
-                                : 'Next turn in $minutesLeft mins',
+                                ? strings.bedTurnRepositioningOverdue
+                                : strings.bedTurnNextIn(minutesLeft),
                             style: TextStyle(
                               color: isOverdue ? AppTheme.rose800 : AppTheme.slate500,
                               fontSize: 11,
@@ -104,7 +107,7 @@ class BedTurnCountdownCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  isOverdue ? 'ACTION DUE' : 'ON SCHEDULE',
+                  isOverdue ? strings.actionDueBadge : strings.onScheduleBadge,
                   style: TextStyle(
                     color: isOverdue ? Colors.white : AppTheme.emerald800,
                     fontSize: 10,
@@ -149,8 +152,8 @@ class BedTurnCountdownCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          'LEFT',
-                          style: TextStyle(
+                          strings.timeLeftBadge,
+                          style: const TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w700,
                             color: AppTheme.slate400,
@@ -169,8 +172,8 @@ class BedTurnCountdownCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'CURRENT POSTURE:',
-                      style: TextStyle(
+                      strings.currentPostureLabel,
+                      style: const TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
                         color: AppTheme.slate400,
@@ -179,7 +182,9 @@ class BedTurnCountdownCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      lastTurn?.posture.label ?? 'Not yet repositioned',
+                      lastTurn != null
+                          ? lastTurn.posture.localizedLabel(langProvider.currentLocale)
+                          : strings.notYetRepositioned,
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -189,7 +194,7 @@ class BedTurnCountdownCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       lastTurn != null
-                          ? 'Skin: ${lastTurn.skinStatus.label.split('(').first} • Heels elevated'
+                          ? 'Skin: ${lastTurn.skinStatus.localizedLabel(langProvider.currentLocale)} • Heels elevated'
                           : 'Schedule: Every 2 hours strictly',
                       style: const TextStyle(
                         fontSize: 11,
@@ -211,9 +216,9 @@ class BedTurnCountdownCard extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: onViewTurningScreen,
               icon: const Icon(Icons.sync_rounded, size: 18),
-              label: const Text(
-                'Log Bed Turn & Skin Check',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+              label: Text(
+                strings.logBedTurnBtn,
+                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
               ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: isOverdue ? AppTheme.rose800 : AppTheme.primaryBlue,

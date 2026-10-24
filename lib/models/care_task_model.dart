@@ -1,13 +1,20 @@
 enum TaskCategory {
-  medication('Medication', 'බෙහෙත් දීම'),
-  nutrition('Nutrition & Diet', 'ආහාර සහ කැඳ/බීම'),
-  hygiene('Hygiene & Bath', 'ස්නානය සහ පිරිසිදු කිරීම'),
-  physiotherapy('Mobility / PT', 'ව්‍යායාම සහ ඇවිද්දවීම'),
-  hydration('Hydration Check', 'ජලය සහ දියර ලබා දීම');
+  medication('Medication', 'බෙහෙත් දීම', 'மருந்து வழங்கல்'),
+  nutrition('Nutrition & Diet', 'ආහාර සහ කැඳ/බීම', 'ஊட்டச்சத்து & உணவு'),
+  hygiene('Hygiene & Bath', 'ස්නානය සහ පිරිසිදු කිරීම', 'சுத்தம் & குளியல்'),
+  physiotherapy('Mobility / PT', 'ව්‍යායාම සහ ඇවිද්දවීම', 'உடற்பயிற்சி / இயக்கம்'),
+  hydration('Hydration Check', 'ජලය සහ දියර ලබා දීම', 'நீரேற்றம் சரிபார்ப்பு');
 
   final String titleEn;
   final String titleSi;
-  const TaskCategory(this.titleEn, this.titleSi);
+  final String titleTa;
+  const TaskCategory(this.titleEn, this.titleSi, this.titleTa);
+
+  String localizedTitle(String lang) {
+    if (lang == 'si') return titleSi;
+    if (lang == 'ta') return titleTa;
+    return titleEn;
+  }
 }
 
 class CareTaskModel {
@@ -19,6 +26,9 @@ class CareTaskModel {
   bool isCompleted;
   DateTime? completedAt;
   String? notes;
+  bool isConfirmed;
+  DateTime? confirmedAt;
+  String? confirmedBy;
 
   CareTaskModel({
     required this.id,
@@ -29,12 +39,18 @@ class CareTaskModel {
     this.isCompleted = false,
     this.completedAt,
     this.notes,
+    this.isConfirmed = false,
+    this.confirmedAt,
+    this.confirmedBy,
   });
 
   CareTaskModel copyWith({
     bool? isCompleted,
     DateTime? completedAt,
     String? notes,
+    bool? isConfirmed,
+    DateTime? confirmedAt,
+    String? confirmedBy,
   }) {
     return CareTaskModel(
       id: id,
@@ -45,6 +61,9 @@ class CareTaskModel {
       isCompleted: isCompleted ?? this.isCompleted,
       completedAt: completedAt ?? this.completedAt,
       notes: notes ?? this.notes,
+      isConfirmed: isConfirmed ?? this.isConfirmed,
+      confirmedAt: confirmedAt ?? this.confirmedAt,
+      confirmedBy: confirmedBy ?? this.confirmedBy,
     );
   }
 }

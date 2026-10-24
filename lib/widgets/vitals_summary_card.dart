@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/vitals_entry_model.dart';
+import '../providers/language_provider.dart';
 import '../providers/staff_duty_provider.dart';
 import '../theme/app_theme.dart';
 
@@ -15,6 +16,8 @@ class VitalsSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final langProvider = context.watch<LanguageProvider>();
+    final strings = langProvider.strings;
     final provider = context.watch<StaffDutyProvider>();
     final vitals = provider.latestVitals;
 
@@ -59,9 +62,9 @@ class VitalsSummaryCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Bedside Vitals Monitor',
-                            style: TextStyle(
+                          Text(
+                            strings.bedsideVitalsMonitor,
+                            style: const TextStyle(
                               color: AppTheme.slate900,
                               fontWeight: FontWeight.w800,
                               fontSize: 14,
@@ -71,8 +74,8 @@ class VitalsSummaryCard extends StatelessWidget {
                           ),
                           Text(
                             vitals != null
-                                ? 'Recorded ${DateFormat('hh:mm a').format(vitals.recordedAt)}'
-                                : 'No vitals recorded today',
+                                ? strings.recordedAtTime(DateFormat('hh:mm a').format(vitals.recordedAt))
+                                : strings.noVitalsRecordedToday,
                             style: const TextStyle(
                               color: AppTheme.slate500,
                               fontSize: 12,
@@ -90,7 +93,7 @@ class VitalsSummaryCard extends StatelessWidget {
               IconButton(
                 onPressed: onLogVitals,
                 icon: const Icon(Icons.add_circle, color: AppTheme.primaryBlue, size: 28),
-                tooltip: 'Log New Vitals',
+                tooltip: strings.recordVitalsTooltip,
               ),
             ],
           ),

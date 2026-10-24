@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_language.dart';
+import '../models/caregiver_user_model.dart';
 import '../providers/language_provider.dart';
+import '../providers/staff_duty_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_brand_header.dart';
 import 'forgot_password_page.dart';
@@ -19,8 +23,8 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
 
-  final _membershipNumberCtrl = TextEditingController(text: 'PLC-MEM-1001');
-  final _passwordCtrl = TextEditingController(text: '1234');
+  final _membershipNumberCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController();
 
   bool _obscurePassword = true;
   bool _agreedToPrivacyPolicy = true;
@@ -43,13 +47,7 @@ class _LoginPageState extends State<LoginPage> {
     if (!_agreedToPrivacyPolicy) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            lang.currentLanguage == AppLanguage.si
-                ? 'කරුණාකර රහස්‍යතා ප්‍රතිපත්තියට එකඟ වන්න'
-                : lang.currentLanguage == AppLanguage.ta
-                    ? 'தயவுசெய்து தனியுரிமைக் கொள்கையை ஏற்றுக்கொள்ளுங்கள்'
-                    : 'Please agree to the Privacy Policy to proceed',
-          ),
+          content: Text(lang.strings.agreePrivacyPolicyAlert),
           backgroundColor: AppTheme.amber500,
         ),
       );
@@ -57,14 +55,117 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 600));
 
-    if (mounted) {
-      setState(() => _isLoading = false);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MainNavigationWrapper()),
-      );
+    try {
+      var rawId = _membershipNumberCtrl.text.trim().toUpperCase();
+      // If user typed only numbers (e.g. 1001), automatically prepend PLC-
+      if (RegExp(r'^\d+$').hasMatch(rawId)) {
+        rawId = 'PLC-$rawId';
+      }
+      final enteredPassword = _passwordCtrl.text.trim();
+
+      final col = FirebaseFirestore.instance.collection('caregivers');
+      DocumentSnapshot<Map<String, dynamic>>? targetDoc;
+      Map<String, dynamic>? data;
+
+      // 1. Try direct doc ID lookup (e.g. PLC-1001)
+      final directDoc = await col.doc(rawId).get();
+      if (directDoc.exists && directDoc.data() != null) {
+        targetDoc = directDoc;
+        data = directDoc.data();
+      } else {
+        // 2. Query by membershipNumber
+        final qMem = await col.where('membershipNumber', isEqualTo: rawId).limit(1).get();
+        if (qMem.docs.isNotEmpty) {
+          targetDoc = qMem.docs.first;
+          data = targetDoc.data();
+        } else {
+          // 3. Query by staffRegNo
+          final qReg = await col.where('staffRegNo', isEqualTo: rawId).limit(1).get();
+          if (qReg.docs.isNotEmpty) {
+            targetDoc = qReg.docs.first;
+            data = targetDoc.data();
+          } else {
+            // 4. Query by phone
+            final qPhone = await col.where('phone', isEqualTo: rawId).limit(1).get();
+            if (qPhone.docs.isNotEmpty) {
+              targetDoc = qPhone.docs.first;
+              data = targetDoc.data();
+            } else {
+              // 5. Query by email
+              final qEmail = await col.where('email', isEqualTo: rawId.toLowerCase()).limit(1).get();
+              if (qEmail.docs.isNotEmpty) {
+                targetDoc = qEmail.docs.first;
+                data = targetDoc.data();
+              }
+            }
+          }
+        }
+      }
+
+      if (data == null) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Account "$rawId" not found. Please register first or check your details.'),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+        return;
+      }
+
+      final savedPassword = data['password']?.toString() ?? '';
+      if (savedPassword.isNotEmpty && savedPassword != enteredPassword) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Incorrect password. Please try again.'),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Success! Load user profile into provider
+      final caregiverUser = CaregiverUserModel.fromMap(data, targetDoc?.id ?? rawId);
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('is_logged_in', true);
+        await prefs.setString('logged_membership_no', caregiverUser.staffRegNo);
+      } catch (prefErr) {
+        debugPrint('[LoginPage] SharedPreferences session persist warning: $prefErr');
+      }
+
+      if (mounted) {
+        Provider.of<StaffDutyProvider>(context, listen: false).setCurrentStaff(caregiverUser);
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Welcome, ${caregiverUser.fullName} (${caregiverUser.staffRegNo})!'),
+            backgroundColor: AppTheme.emeraldGreen,
+          ),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainNavigationWrapper()),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        final shortMsg = e.toString().split('\n').first;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Login connection error: $shortMsg'),
+            backgroundColor: Colors.redAccent,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
     }
   }
 
@@ -77,16 +178,11 @@ class _LoginPageState extends State<LoginPage> {
       final lang = Provider.of<LanguageProvider>(context, listen: false);
       setState(() {
         _membershipNumberCtrl.text = result;
+        _passwordCtrl.clear();
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            lang.currentLanguage == AppLanguage.si
-                ? 'සාමාජික අංකය $result ඇතුළත් විය. මුරපදය යොදා Login වන්න.'
-                : lang.currentLanguage == AppLanguage.ta
-                    ? 'உறுப்பினர் எண் $result நிரப்பப்பட்டது. கடவுச்சொல்லைப் பயன்படுத்தி உள்நுழையவும்.'
-                    : 'Member ID $result filled. Please sign in with your password.',
-          ),
+          content: Text(lang.strings.memberIdFilledPrompt(result)),
           backgroundColor: AppTheme.emeraldGreen,
         ),
       );
@@ -107,7 +203,7 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 1. Compact Brand Header without the "සාමාජික පිවිසුම" banner
+              // 1. Compact Brand Header
               const AppBrandHeader(
                 showPageTitle: false,
                 compact: true,
@@ -159,7 +255,7 @@ class _LoginPageState extends State<LoginPage> {
                       TextFormField(
                         controller: _membershipNumberCtrl,
                         decoration: InputDecoration(
-                          hintText: s.membershipNumberHint,
+                          hintText: 'e.g. PLC-1001, phone, or email',
                           prefixIcon: const Icon(Icons.badge_outlined, size: 20),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                         ),
@@ -317,7 +413,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 14),
 
-              // 3. Single-Row Register Section (Reduced Height)
+              // 3. Single-Row Register Section
               Container(
                 decoration: BoxDecoration(
                   color: AppTheme.blue50,
@@ -363,7 +459,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 14),
 
-              // 4. Language Switcher Bar at the Bottom (සිංහල 🇱🇰 | English 🇬🇧 | தமிழ் 🇮🇳)
+              // 4. Language Switcher Bar at the Bottom
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -412,7 +508,7 @@ class _LoginPageState extends State<LoginPage> {
                                     const SizedBox(width: 3),
                                     Flexible(
                                       child: Text(
-                                        lang.nativeName,
+                                        lang.displayName(currentLang),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(

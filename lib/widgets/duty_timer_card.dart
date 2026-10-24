@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/language_provider.dart';
 import '../providers/staff_duty_provider.dart';
 import '../theme/app_theme.dart';
 
@@ -15,6 +16,8 @@ class DutyTimerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final langProvider = context.watch<LanguageProvider>();
+    final strings = langProvider.strings;
     final provider = context.watch<StaffDutyProvider>();
     final isClockedIn = provider.isClockedIn;
     final duration = provider.elapsedShiftDuration;
@@ -74,7 +77,7 @@ class DutyTimerCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
-                          isClockedIn ? 'ACTIVE ON DUTY' : 'OFF DUTY',
+                          isClockedIn ? strings.activeOnDutyBadge : strings.offDutyBadge,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 11,
@@ -119,7 +122,7 @@ class DutyTimerCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isClockedIn ? 'SHIFT DURATION ELAPSED' : 'READY TO START SHIFT',
+                      isClockedIn ? strings.shiftDurationElapsed : strings.readyToStartShift,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.75),
                         fontSize: 10,
@@ -168,7 +171,7 @@ class DutyTimerCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      isClockedIn ? 'Clock Out' : 'Clock In',
+                      isClockedIn ? strings.clockOutBtn : strings.clockInBtn,
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 12,
@@ -189,7 +192,7 @@ class DutyTimerCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Staff: ${provider.currentStaff.fullName}',
+                  '${strings.staffLabel}: ${provider.currentStaff.fullName}',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.9),
                     fontSize: 12,
@@ -217,39 +220,155 @@ class DutyTimerCard extends StatelessWidget {
 
   void _showClockInOutDialog(BuildContext context, StaffDutyProvider provider) {
     final isClockingOut = provider.isClockedIn;
+    final notesController = TextEditingController();
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(isClockingOut ? 'End Current Shift?' : 'Start Shift Duty?'),
-        content: Text(
-          isClockingOut
-              ? 'Are you sure you want to clock out? This will finalize your shift hours and notify the clinical coordinator.'
-              : 'You are clocking in for duty at ${provider.currentPatient.fullName}\'s residence (${provider.currentPatient.city}).',
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(
+              isClockingOut ? Icons.logout_rounded : Icons.login_rounded,
+              color: isClockingOut ? const Color(0xFFEF4444) : AppTheme.emeraldGreen,
+              size: 22,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              isClockingOut ? 'Daily Shift Check-Out' : 'Start Daily Shift (Check-In)',
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (isClockingOut) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Shift Hours Worked:', style: TextStyle(fontSize: 11.5, color: AppTheme.slate600)),
+                          Text(
+                            '${provider.elapsedShiftDuration.inHours}h ${provider.elapsedShiftDuration.inMinutes.remainder(60)}m',
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.slate900),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Vitals Recorded Today:', style: TextStyle(fontSize: 11.5, color: AppTheme.slate600)),
+                          Text(
+                            '${provider.todayVitalsCount} Entries',
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF0284C7)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Bed Repositions Today:', style: TextStyle(fontSize: 11.5, color: AppTheme.slate600)),
+                          Text(
+                            '${provider.todayBedTurnsCount} Turns',
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF10B981)),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Handover Observation Notes:',
+                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppTheme.slate800),
+                ),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: notesController,
+                  maxLines: 2,
+                  style: const TextStyle(fontSize: 12),
+                  decoration: InputDecoration(
+                    hintText: 'e.g. Patient stable, vitals normal, took dinner & night meds.',
+                    hintStyle: const TextStyle(fontSize: 11, color: AppTheme.slate400),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Notice: Check-Out completes only today\'s daily shift. Your remaining contract days will remain active for tomorrow.',
+                  style: TextStyle(fontSize: 10, color: AppTheme.slate500, height: 1.3),
+                ),
+              ] else ...[
+                Text(
+                  'You are checking in for bedside duty at ${provider.currentPatient.fullName}\'s residence (${provider.currentPatient.city}).',
+                  style: const TextStyle(fontSize: 12.5, color: AppTheme.slate700, height: 1.35),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: const [
+                    Icon(Icons.location_on_rounded, size: 14, color: Color(0xFF16A34A)),
+                    SizedBox(width: 4),
+                    Text(
+                      'GPS location will be verified & logged for Admin audit.',
+                      style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: Color(0xFF15803D)),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(ctx);
-              provider.toggleClockIn();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    isClockingOut
-                        ? 'Successfully clocked out. Shift report submitted.'
-                        : 'Shift started! Duty timer is now running.',
+              if (isClockingOut) {
+                await provider.clockOutDailyShift(
+                  handoverNotes: notesController.text.trim().isNotEmpty ? notesController.text.trim() : null,
+                );
+              } else {
+                await provider.clockInDailyShift();
+              }
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      isClockingOut
+                          ? 'Daily shift checked out successfully! Shift report submitted for audit.'
+                          : 'Shift started! Duty timer and GPS monitoring are now active.',
+                    ),
+                    backgroundColor: isClockingOut ? AppTheme.slate800 : AppTheme.emeraldGreen,
                   ),
-                  backgroundColor: isClockingOut ? AppTheme.slate800 : AppTheme.emeraldGreen,
-                ),
-              );
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: isClockingOut ? AppTheme.rose500 : AppTheme.emeraldGreen,
+              backgroundColor: isClockingOut ? const Color(0xFFEF4444) : AppTheme.emeraldGreen,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: Text(isClockingOut ? 'Confirm Clock Out' : 'Confirm Clock In'),
+            child: Text(
+              isClockingOut ? 'Confirm Check-Out' : 'Confirm Check-In',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),

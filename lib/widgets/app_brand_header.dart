@@ -23,8 +23,8 @@ class AppBrandHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lang = Provider.of<LanguageProvider>(context, listen: false);
-    final logoSize = compact ? 58.0 : 68.0;
+    final lang = Provider.of<LanguageProvider>(context);
+    final logoSize = compact ? 62.0 : 74.0;
     final iconSize = compact ? 30.0 : 36.0;
 
     return Column(
@@ -42,47 +42,33 @@ class AppBrandHeader extends StatelessWidget {
         else
           SizedBox(height: compact ? 4 : 10),
 
-        // Brand Logo Emblem
+        // Brand Logo Emblem (Official Logo)
         Center(
           child: Container(
             width: logoSize,
             height: logoSize,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(compact ? 18 : 22),
+              shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.primaryBlue.withValues(alpha: 0.25),
+                  color: const Color(0xFF0284C7).withValues(alpha: 0.20),
                   blurRadius: compact ? 12 : 16,
-                  offset: const Offset(0, 6),
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Icon(
-                  Icons.favorite_rounded,
-                  color: Colors.white,
-                  size: iconSize,
-                ),
-                Positioned(
-                  bottom: compact ? 9 : 11,
-                  right: compact ? 9 : 11,
-                  child: Container(
-                    padding: const EdgeInsets.all(2.5),
-                    decoration: const BoxDecoration(
-                      color: AppTheme.emeraldGreen,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.add, color: Colors.white, size: compact ? 10 : 12),
+            child: ClipOval(
+              child: Image.asset(
+                'assets/images/app_logo.png',
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  decoration: const BoxDecoration(
+                    color: AppTheme.primaryBlue,
+                    shape: BoxShape.circle,
                   ),
+                  child: Icon(Icons.local_hospital_rounded, color: Colors.white, size: iconSize),
                 ),
-              ],
+              ),
             ),
           ),
         ),

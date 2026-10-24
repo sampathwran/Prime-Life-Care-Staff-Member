@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/vitals_entry_model.dart';
+import '../providers/language_provider.dart';
 import '../providers/staff_duty_provider.dart';
 import '../theme/app_theme.dart';
 
@@ -24,18 +25,20 @@ class _VitalsLoggerViewState extends State<VitalsLoggerView> {
 
   @override
   Widget build(BuildContext context) {
+    final langProvider = context.watch<LanguageProvider>();
+    final strings = langProvider.strings;
     final provider = context.watch<StaffDutyProvider>();
     final vitalsList = provider.vitalsLog;
     final patient = provider.currentPatient;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bedside Vitals & Health'),
+        title: Text(strings.bedsideVitalsTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.add_circle, color: AppTheme.primaryBlue, size: 28),
             onPressed: () => _openAddVitalsDialog(context),
-            tooltip: 'Record Vitals',
+            tooltip: strings.recordVitalsTooltip,
           ),
           const SizedBox(width: 8),
         ],
@@ -85,9 +88,9 @@ class _VitalsLoggerViewState extends State<VitalsLoggerView> {
             ElevatedButton.icon(
               onPressed: () => _openAddVitalsDialog(context),
               icon: const Icon(Icons.add_chart_rounded, size: 20),
-              label: const Text(
-                'Record New Vitals Check Now',
-                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+              label: Text(
+                strings.recordNewVitalsCta,
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryBlue,
@@ -108,14 +111,14 @@ class _VitalsLoggerViewState extends State<VitalsLoggerView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.info_outline_rounded, size: 16, color: AppTheme.slate600),
-                      SizedBox(width: 6),
+                      const Icon(Icons.info_outline_rounded, size: 16, color: AppTheme.slate600),
+                      const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          'Elderly Clinical Reference Thresholds',
-                          style: TextStyle(
+                          strings.clinicalReferenceGuideTitle,
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: AppTheme.slate800,
@@ -145,10 +148,10 @@ class _VitalsLoggerViewState extends State<VitalsLoggerView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Recorded Vitals History',
-                    style: TextStyle(
+                    strings.recordedVitalsHistoryTitle,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                       color: AppTheme.slate900,
@@ -157,7 +160,7 @@ class _VitalsLoggerViewState extends State<VitalsLoggerView> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '${vitalsList.length} Records',
+                  strings.recordsCount(vitalsList.length),
                   style: const TextStyle(fontSize: 12, color: AppTheme.slate500),
                 ),
               ],
@@ -173,7 +176,7 @@ class _VitalsLoggerViewState extends State<VitalsLoggerView> {
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppTheme.slate200),
                 ),
-                child: const Text('No vitals records found.'),
+                child: Text(strings.noVitalsFound),
               )
             else
               ListView.separated(

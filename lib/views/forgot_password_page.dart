@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../l10n/app_language.dart';
 import '../providers/language_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_brand_header.dart';
@@ -110,11 +109,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  lang.currentLanguage == AppLanguage.si
-                                      ? 'ඔබගේ ලියාපදිංචි දුරකථන අංකයට මුරපදය නැවත සැකසීමේ OTP කේතයක් SMS මඟින් ලැබෙනු ඇත.'
-                                      : lang.currentLanguage == AppLanguage.ta
-                                          ? 'உங்கள் பதிவுசெய்த தொலைபேசி எண்ணிற்கு SMS மூலம் OTP அனுப்பப்படும்.'
-                                          : 'A password reset OTP code will be sent to your registered mobile phone via SMS.',
+                                  s.otpInfoNote,
                                   style: const TextStyle(fontSize: 11, color: AppTheme.slate700, height: 1.4),
                                 ),
                               ),
@@ -168,11 +163,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        lang.currentLanguage == AppLanguage.si
-                            ? 'OTP කේතය යවන ලදී!'
-                            : lang.currentLanguage == AppLanguage.ta
-                                ? 'OTP அனுப்பப்பட்டது!'
-                                : 'OTP Sent Successfully!',
+                        s.otpSentSuccessTitle,
                         style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
@@ -181,7 +172,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        '${_inputCtrl.text.trim()} ${lang.currentLanguage == AppLanguage.si ? 'වෙත මුරපදය නැවත සකසන OTP කේතය යවන ලදී. කරුණාකර SMS පරීක්ෂා කරන්න.' : lang.currentLanguage == AppLanguage.ta ? 'எண்ணிற்கு கடவுச்சொல் மீட்டமைப்பு OTP அனுப்பப்பட்டுள்ளது.' : 'has been sent a password reset OTP. Please check your SMS messages.'}',
+                        '${_inputCtrl.text.trim()} - ${s.otpSentSuccessDesc}',
                         textAlign: TextAlign.center,
                         style: const TextStyle(fontSize: 11, color: AppTheme.slate600, height: 1.4),
                       ),

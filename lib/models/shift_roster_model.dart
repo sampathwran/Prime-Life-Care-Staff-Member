@@ -13,6 +13,7 @@ enum ShiftStatus {
   active,
   upcoming,
   completed,
+  canceled,
 }
 
 class ShiftRosterModel {
@@ -26,6 +27,9 @@ class ShiftRosterModel {
   final String careNotes;
   final double paymentAmount;
   final bool isPaid;
+  final String? cancellationReason;
+  final double? ratingByMember;
+  final String? memberFeedback;
 
   const ShiftRosterModel({
     required this.id,
@@ -38,5 +42,40 @@ class ShiftRosterModel {
     required this.careNotes,
     required this.paymentAmount,
     this.isPaid = false,
+    this.cancellationReason,
+    this.ratingByMember,
+    this.memberFeedback,
   });
+
+  ShiftRosterModel copyWith({
+    String? id,
+    DateTime? date,
+    ShiftType? shiftType,
+    ShiftStatus? status,
+    String? patientName,
+    String? patientLocation,
+    String? patientPhone,
+    String? careNotes,
+    double? paymentAmount,
+    bool? isPaid,
+    String? cancellationReason,
+    double? ratingByMember,
+    String? memberFeedback,
+  }) {
+    return ShiftRosterModel(
+      id: id ?? this.id,
+      date: date ?? this.date,
+      shiftType: shiftType ?? this.shiftType,
+      status: status ?? this.status,
+      patientName: patientName ?? this.patientName,
+      patientLocation: patientLocation ?? this.patientLocation,
+      patientPhone: patientPhone ?? this.patientPhone,
+      careNotes: careNotes ?? this.careNotes,
+      paymentAmount: paymentAmount ?? this.paymentAmount,
+      isPaid: isPaid ?? this.isPaid,
+      cancellationReason: cancellationReason ?? this.cancellationReason,
+      ratingByMember: ratingByMember ?? this.ratingByMember,
+      memberFeedback: memberFeedback ?? this.memberFeedback,
+    );
+  }
 }

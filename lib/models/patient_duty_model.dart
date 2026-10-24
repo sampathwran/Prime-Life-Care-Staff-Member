@@ -1,3 +1,5 @@
+import 'care_booking_model.dart';
+
 class PatientDutyModel {
   final String id;
   final String fullName;
@@ -40,4 +42,52 @@ class PatientDutyModel {
     required this.criticalAlerts,
     required this.bloodGroup,
   });
+
+  factory PatientDutyModel.fromBooking(CareBookingModel b) {
+    return PatientDutyModel(
+      id: b.id,
+      fullName: b.patientName,
+      age: b.patientAge,
+      gender: b.patientGender,
+      diagnosis: b.diagnosis,
+      careCategory: b.careCategory,
+      mobilityStatus: 'Assisted Care & Vitals Monitor',
+      roomNumber: 'Residence Bedroom',
+      address: b.address.isNotEmpty ? b.address : '${b.city}, ${b.district}',
+      city: b.city.isNotEmpty ? b.city : b.district,
+      guardianName: b.guardianName,
+      guardianRelationship: b.guardianRelationship,
+      guardianPhone: b.guardianPhone,
+      emergencyContact: b.guardianPhone,
+      supervisorName: 'PLC Operations Center',
+      supervisorPhone: '+94 11 234 5678',
+      dietaryNotes: const ['Medication compliance', 'Hydration & nutrition monitoring'],
+      criticalAlerts: [b.diagnosis],
+      bloodGroup: 'Reported upon arrival',
+    );
+  }
+
+  factory PatientDutyModel.empty() {
+    return const PatientDutyModel(
+      id: 'none',
+      fullName: 'No Patient Assigned',
+      age: 0,
+      gender: 'N/A',
+      diagnosis: 'Currently on standby / available for duty',
+      careCategory: 'Standby',
+      mobilityStatus: 'N/A',
+      roomNumber: 'N/A',
+      address: 'N/A',
+      city: 'N/A',
+      guardianName: 'N/A',
+      guardianRelationship: 'N/A',
+      guardianPhone: '',
+      emergencyContact: '',
+      supervisorName: 'PLC Operations Center',
+      supervisorPhone: '+94 11 234 5678',
+      dietaryNotes: [],
+      criticalAlerts: [],
+      bloodGroup: 'N/A',
+    );
+  }
 }
